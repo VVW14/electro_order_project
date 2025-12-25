@@ -1,0 +1,264 @@
+import QtQuick
+import QtQuick.Controls
+import QtQuick.Layouts
+import QtQuick.Window
+
+ApplicationWindow {
+    width: 1200
+    height: 800
+    visible: true
+    title: "Система формирования заказов - Электротехническое производство"
+
+    property int currentPageIndex: 0
+    
+    // Простая навигация
+    TabBar {
+        id: tabBar
+        width: parent.width
+        
+        TabButton {
+            text: "Главная"
+            onClicked: stackLayout.currentIndex = 0
+        }
+        TabButton {
+            text: "Каталог"
+            onClicked: stackLayout.currentIndex = 1
+        }
+        TabButton {
+            text: "Новый заказ"
+            onClicked: stackLayout.currentIndex = 2
+        }
+        TabButton {
+            text: "Список заказов"
+            onClicked: stackLayout.currentIndex = 3
+        }
+        TabButton {
+            text: "Статистика"
+            onClicked: stackLayout.currentIndex = 4
+        }
+        TabButton {
+            text: "Настройки"
+            onClicked: stackLayout.currentIndex = 5
+        }
+    }
+
+    // Основной контент
+    StackLayout {
+        id: stackLayout
+        anchors.top: tabBar.bottom
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.bottom: parent.bottom
+        currentIndex: 0
+
+        // Главная страница
+        Page {
+            ColumnLayout {
+                anchors.centerIn: parent
+                spacing: 20
+                
+                Text {
+                    text: "Добро пожаловать в систему заказов"
+                    font.pixelSize: 24
+                    font.bold: true
+                }
+                
+                Text {
+                    text: "Всего заказов: " + (backend.orders ? backend.orders.length : 0)
+                    font.pixelSize: 18
+                }
+                
+                Text {
+                    text: "Всего продуктов: " + (backend.products ? backend.products.length : 0)
+                    font.pixelSize: 18
+                }
+            }
+        }
+
+        // Каталог продукции
+        Page {
+            ScrollView {
+                anchors.fill: parent
+                anchors.margins: 10
+                
+                GridLayout {
+                    width: parent.width
+                    columns: 3
+                    
+                    Repeater {
+                        model: backend.products
+                        
+                        Rectangle {
+                            width: 250
+                            height: 150
+                            border.color: "gray"
+                            border.width: 1
+                            radius: 5
+                            
+                            ColumnLayout {
+                                anchors.fill: parent
+                                anchors.margins: 10
+                                
+                                Text {
+                                    text: modelData.name || ""
+                                    font.bold: true
+                                    font.pixelSize: 14
+                                    wrapMode: Text.WordWrap
+                                    Layout.fillWidth: true
+                                }
+                                
+                                Text {
+                                    text: "Категория: " + (modelData.category || "")
+                                    font.pixelSize: 12
+                                    Layout.fillWidth: true
+                                }
+                                
+                                Text {
+                                    text: "Цена: " + (modelData.price ? modelData.price.toFixed(2) + " ₽" : "")
+                                    font.bold: true
+                                    font.pixelSize: 13
+                                    color: "green"
+                                    Layout.fillWidth: true
+                                }
+                                
+                                Text {
+                                    text: "В наличии: " + (modelData.quantity || 0)
+                                    font.pixelSize: 12
+                                    color: "blue"
+                                    Layout.fillWidth: true
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // Создание заказа (упрощенная форма)
+        Page {
+            ColumnLayout {
+                anchors.fill: parent
+                anchors.margins: 20
+                spacing: 10
+                
+                TextField {
+                    id: customerName
+                    placeholderText: "ФИО клиента"
+                    Layout.fillWidth: true
+                }
+                
+                TextField {
+                    id: customerPhone
+                    placeholderText: "Телефон"
+                    Layout.fillWidth: true
+                }
+                
+                TextArea {
+                    id: notes
+                    placeholderText: "Примечания"
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: 100
+                }
+                
+                Button {
+                    text: "Создать заказ"
+                    Layout.alignment: Qt.AlignCenter
+                    
+                    onClicked: {
+                        if (customerName.text && customerPhone.text) {
+                            // Простой заказ с тестовыми данными
+                            var items = [
+                                {product_id: 1, quantity: 2, price: 45.80},
+                                {product_id: 2, quantity: 1, price: 320.50}
+                            ];
+                            
+                            if (backend.createOrder(customerName.text, "", customerPhone.text, notes.text, items)) {
+                                customerName.text = ""
+                                customerPhone.text = ""
+                                notes.text = ""
+                                console.log("Заказ создан!");
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // Список заказов
+        Page {
+            ListView {
+                anchors.fill: parent
+                anchors.margins: 10
+                model: backend.orders
+                
+                delegate: Rectangle {
+                    width: parent.width
+                    height: 70
+                    border.color: "gray"
+                    border.width: 1
+                    radius: 5
+                    
+                    ColumnLayout {
+                        anchors.fill: parent
+                        anchors.margins: 10
+                        
+                        Text {
+                            text: "Заказ #" + (modelData.order_number || "")
+                            font.bold: true
+                            font.pixelSize: 16
+                        }
+                        
+                        Text {
+                            text: "Клиент: " + (modelData.customer_name || "")
+                            font.pixelSize: 14
+                        }
+                        
+                        Text {
+                            text: "Сумма: " + (modelData.total_amount ? modelData.total_amount.toFixed(2) + " ₽" : "")
+                            font.pixelSize: 14
+                            color: "green"
+                        }
+                    }
+                }
+            }
+        }
+
+        // Статистика
+        Page {
+            ColumnLayout {
+                anchors.centerIn: parent
+                spacing: 20
+                
+                Text {
+                    text: "Статистика"
+                    font.pixelSize: 24
+                    font.bold: true
+                }
+                
+                Text {
+                    text: "Общее количество заказов: " + (backend.orders ? backend.orders.length : 0)
+                    font.pixelSize: 18
+                }
+            }
+        }
+
+        // Настройки
+        Page {
+            ColumnLayout {
+                anchors.centerIn: parent
+                spacing: 20
+                
+                Text {
+                    text: "Настройки"
+                    font.pixelSize: 24
+                    font.bold: true
+                }
+                
+                Text {
+                    text: "Здесь будут настройки приложения"
+                    font.pixelSize: 18
+                }
+            }
+        }
+    }
+}
