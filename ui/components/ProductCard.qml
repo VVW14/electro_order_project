@@ -13,9 +13,8 @@ Rectangle {
     border.width: 1
     
     property var productData: ({})
-    property bool selected: false
     
-    // Свойство для передачи функции обратного вызова
+    // Функция обратного вызова вместо сигнала
     property var onAddToCart: null
     
     ColumnLayout {
@@ -64,34 +63,23 @@ Rectangle {
         
         // Кнопка добавления в заказ
         Button {
+            id: addButton
             Layout.fillWidth: true
             text: "Добавить в заказ"
             enabled: productData.quantity > 0
             
             onClicked: {
-                if (onAddToCart) {
+                console.log("КНОПКА НАЖАТА: Добавление продукта", productData.name)
+                console.log("productData:", JSON.stringify(productData))
+                console.log("onAddToCart:", onAddToCart)
+                
+                if (onAddToCart && typeof onAddToCart === "function") {
+                    console.log("Вызываю функцию onAddToCart...")
                     onAddToCart(productData)
-                    // Анимация добавления
-                    addAnim.start()
+                } else {
+                    console.log("ОШИБКА: onAddToCart не является функцией или не определена")
                 }
             }
-        }
-    }
-    
-    // Анимация добавления
-    SequentialAnimation {
-        id: addAnim
-        PropertyAnimation {
-            target: card
-            property: "scale"
-            to: 0.95
-            duration: 100
-        }
-        PropertyAnimation {
-            target: card
-            property: "scale"
-            to: 1.0
-            duration: 100
         }
     }
     
@@ -99,19 +87,6 @@ Rectangle {
     MouseArea {
         anchors.fill: parent
         cursorShape: Qt.PointingHandCursor
-        onClicked: console.log("Клик по продукту:", productData.name)
-        hoverEnabled: true
-        
-        onEntered: {
-            if (!selected) {
-                card.border.color = "blue"
-            }
-        }
-        
-        onExited: {
-            if (!selected) {
-                card.border.color = Material.dividerColor
-            }
-        }
+        onClicked: console.log("Клик по карточке:", productData.name)
     }
 }

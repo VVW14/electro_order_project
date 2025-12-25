@@ -140,7 +140,7 @@ Page {
                     }
                 }
             }
-            
+            /*
             // Карточка выручки
             Rectangle {
                 Layout.fillWidth: true
@@ -176,6 +176,7 @@ Page {
                     }
                 }
             }
+            */
         }
         
         // Последние заказы
@@ -262,12 +263,14 @@ Page {
                             }
                             
                             // Сумма
+                            /*
                             Text {
                                 text: (modelData.total_amount || 0).toFixed(2) + " ₽"
                                 font.bold: true
                                 font.pixelSize: 14
                                 color: Material.color(Material.Green, Material.Shade700)
                             }
+                            */
                             
                             // Дата
                             Text {
