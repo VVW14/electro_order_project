@@ -15,19 +15,8 @@ Rectangle {
     property var productData: ({})
     property bool selected: false
     
-    signal clicked()
-    signal addToCart()
-    
-    // Эффект при выборе
-    layer.enabled: selected
-    layer.effect: DropShadow {
-        transparentBorder: true
-        horizontalOffset: 0
-        verticalOffset: 0
-        radius: 8
-        samples: 17
-        color: Material.color(Material.Blue, Material.Shade200)
-    }
+    // Свойство для передачи функции обратного вызова
+    property var onAddToCart: null
     
     ColumnLayout {
         anchors.fill: parent
@@ -43,7 +32,6 @@ Rectangle {
             wrapMode: Text.WordWrap
             maximumLineCount: 2
             elide: Text.ElideRight
-            color: Material.foreground
         }
         
         // Категория
@@ -51,26 +39,7 @@ Rectangle {
             Layout.fillWidth: true
             text: productData.category || ""
             font.pixelSize: 12
-            color: Material.color(Material.Grey)
-        }
-        
-        // Спецификации
-        Column {
-            Layout.fillWidth: true
-            spacing: 2
-            visible: productData.specifications && Object.keys(productData.specifications).length > 0
-            
-            Repeater {
-                model: productData.specifications ? Object.keys(productData.specifications) : []
-                
-                Text {
-                    width: parent.width
-                    text: modelData + ": " + productData.specifications[modelData]
-                    font.pixelSize: 11
-                    color: Material.color(Material.Grey, Material.Shade600)
-                    elide: Text.ElideRight
-                }
-            }
+            color: "gray"
         }
         
         // Цена и количество
@@ -79,33 +48,32 @@ Rectangle {
             spacing: 10
             
             Text {
-                text: qsTr("Цена:") + " " + (productData.price ? productData.price.toFixed(2) + " ₽" : "")
+                text: "Цена: " + (productData.price ? productData.price.toFixed(2) + " ₽" : "")
                 font.bold: true
                 font.pixelSize: 13
-                color: Material.color(Material.Green, Material.Shade700)
+                color: "green"
             }
             
             Text {
-                text: qsTr("В наличии:") + " " + (productData.quantity || 0)
+                text: "В наличии: " + (productData.quantity || 0)
                 font.pixelSize: 12
-                color: Material.color(Material.Blue, Material.Shade600)
+                color: "blue"
                 Layout.fillWidth: true
             }
         }
         
         // Кнопка добавления в заказ
-        CustomButton {
+        Button {
             Layout.fillWidth: true
-            text: qsTr("Добавить в заказ")
-            buttonColor: Material.color(Material.Blue)
-            iconSource: "➕"
+            text: "Добавить в заказ"
             enabled: productData.quantity > 0
             
             onClicked: {
-                card.addToCart()
-                
-                // Анимация добавления
-                addAnim.start()
+                if (onAddToCart) {
+                    onAddToCart(productData)
+                    // Анимация добавления
+                    addAnim.start()
+                }
             }
         }
     }
@@ -131,12 +99,12 @@ Rectangle {
     MouseArea {
         anchors.fill: parent
         cursorShape: Qt.PointingHandCursor
-        onClicked: card.clicked()
+        onClicked: console.log("Клик по продукту:", productData.name)
         hoverEnabled: true
         
         onEntered: {
             if (!selected) {
-                card.border.color = Material.color(Material.Blue, Material.Shade300)
+                card.border.color = "blue"
             }
         }
         

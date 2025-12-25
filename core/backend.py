@@ -153,5 +153,6 @@ class Backend(QObject):
         return [
             p for p in self._products
             if query_lower in p.get('name', '').lower() or 
-               query_lower in p.get('category', '').lower()
+               query_lower in p.get('category', '').lower() or
+               query_lower in str(p.get('specifications', '')).lower()
         ]

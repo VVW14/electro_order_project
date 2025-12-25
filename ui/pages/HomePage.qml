@@ -11,6 +11,7 @@ Page {
     // Статистика
     property int totalOrders: backend.orders ? backend.orders.length : 0
     property int totalProducts: backend.products ? backend.products.length : 0
+    
     property double totalRevenue: {
         var sum = 0
         if (backend.orders) {
@@ -27,11 +28,10 @@ Page {
         
         // Заголовок
         Text {
-            text: qsTr("Добро пожаловать в систему формирования заказов")
+            text: "Добро пожаловать в систему формирования заказов"
             font.pixelSize: 24
             font.bold: true
             Layout.fillWidth: true
-            color: Material.foreground
         }
         
         // Быстрые действия
@@ -40,62 +40,141 @@ Page {
             spacing: 15
             
             CustomButton {
-                text: qsTr("Новый заказ")
-                iconSource: "➕"
+                text: "Новый заказ"
+                iconSource: "+"
                 buttonColor: Material.color(Material.Blue)
                 Layout.fillWidth: true
-                onClicked: mainWindow.navigateToPage(2)
+                onClicked: stackLayout.currentIndex = 2
             }
             
             CustomButton {
-                text: qsTr("Каталог")
+                text: "Каталог"
                 iconSource: "📦"
                 buttonColor: Material.color(Material.Green)
                 Layout.fillWidth: true
-                onClicked: mainWindow.navigateToPage(1)
+                onClicked: stackLayout.currentIndex = 1
             }
             
             CustomButton {
-                text: qsTr("Заказы")
+                text: "Заказы"
                 iconSource: "📋"
                 buttonColor: Material.color(Material.Orange)
                 Layout.fillWidth: true
-                onClicked: mainWindow.navigateToPage(3)
+                onClicked: stackLayout.currentIndex = 3
             }
         }
         
         // Статистика
-        GridLayout {
+        RowLayout {
             Layout.fillWidth: true
-            columns: 3
-            columnSpacing: 15
-            rowSpacing: 15
+            spacing: 15
             
             // Карточка заказов
-            StatsCard {
-                title: qsTr("Всего заказов")
-                value: totalOrders
-                icon: "📋"
-                color: Material.color(Material.Blue)
+            Rectangle {
                 Layout.fillWidth: true
+                height: 120
+                radius: 8
+                color: Material.backgroundColor
+                border.color: Material.dividerColor
+                border.width: 1
+                
+                ColumnLayout {
+                    anchors.fill: parent
+                    anchors.margins: 15
+                    
+                    Text {
+                        text: "📋"
+                        font.pixelSize: 30
+                        Layout.alignment: Qt.AlignHCenter
+                    }
+                    
+                    Text {
+                        text: totalOrders
+                        font.pixelSize: 28
+                        font.bold: true
+                        color: Material.color(Material.Blue)
+                        Layout.alignment: Qt.AlignHCenter
+                    }
+                    
+                    Text {
+                        text: "Всего заказов"
+                        font.pixelSize: 12
+                        color: Material.color(Material.Grey)
+                        Layout.alignment: Qt.AlignHCenter
+                    }
+                }
             }
             
             // Карточка продуктов
-            StatsCard {
-                title: qsTr("Продуктов в каталоге")
-                value: totalProducts
-                icon: "📦"
-                color: Material.color(Material.Green)
+            Rectangle {
                 Layout.fillWidth: true
+                height: 120
+                radius: 8
+                color: Material.backgroundColor
+                border.color: Material.dividerColor
+                border.width: 1
+                
+                ColumnLayout {
+                    anchors.fill: parent
+                    anchors.margins: 15
+                    
+                    Text {
+                        text: "📦"
+                        font.pixelSize: 30
+                        Layout.alignment: Qt.AlignHCenter
+                    }
+                    
+                    Text {
+                        text: totalProducts
+                        font.pixelSize: 28
+                        font.bold: true
+                        color: Material.color(Material.Green)
+                        Layout.alignment: Qt.AlignHCenter
+                    }
+                    
+                    Text {
+                        text: "Продуктов в каталоге"
+                        font.pixelSize: 12
+                        color: Material.color(Material.Grey)
+                        Layout.alignment: Qt.AlignHCenter
+                    }
+                }
             }
             
             // Карточка выручки
-            StatsCard {
-                title: qsTr("Общая выручка")
-                value: totalRevenue.toFixed(2) + " ₽"
-                icon: "💰"
-                color: Material.color(Material.Orange)
+            Rectangle {
                 Layout.fillWidth: true
+                height: 120
+                radius: 8
+                color: Material.backgroundColor
+                border.color: Material.dividerColor
+                border.width: 1
+                
+                ColumnLayout {
+                    anchors.fill: parent
+                    anchors.margins: 15
+                    
+                    Text {
+                        text: "💰"
+                        font.pixelSize: 30
+                        Layout.alignment: Qt.AlignHCenter
+                    }
+                    
+                    Text {
+                        text: totalRevenue.toFixed(2) + " ₽"
+                        font.pixelSize: 20
+                        font.bold: true
+                        color: Material.color(Material.Orange)
+                        Layout.alignment: Qt.AlignHCenter
+                    }
+                    
+                    Text {
+                        text: "Общая выручка"
+                        font.pixelSize: 12
+                        color: Material.color(Material.Grey)
+                        Layout.alignment: Qt.AlignHCenter
+                    }
+                }
             }
         }
         
@@ -118,16 +197,16 @@ Page {
                     Layout.fillWidth: true
                     
                     Text {
-                        text: qsTr("Последние заказы")
+                        text: "Последние заказы"
                         font.pixelSize: 18
                         font.bold: true
                         Layout.fillWidth: true
                     }
                     
                     CustomButton {
-                        text: qsTr("Все заказы")
+                        text: "Все заказы"
                         flat: true
-                        onClicked: mainWindow.navigateToPage(3)
+                        onClicked: stackLayout.currentIndex = 3
                     }
                 }
                 
@@ -137,13 +216,22 @@ Page {
                     Layout.fillWidth: true
                     Layout.fillHeight: true
                     clip: true
-                    model: backend.orders ? backend.orders.slice(0, 5) : []
+                    
+                    model: {
+                        if (!backend.orders || backend.orders.length === 0) {
+                            return []
+                        }
+                        // Берем последние 5 заказов
+                        var orders = backend.orders.slice()
+                        return orders.sort(function(a, b) {
+                            return new Date(b.created_at) - new Date(a.created_at)
+                        }).slice(0, 5)
+                    }
                     
                     delegate: Rectangle {
                         width: recentOrdersList.width
                         height: 60
-                        color: index % 2 === 0 ? Material.backgroundColor : 
-                                               Material.color(Material.Grey, Material.Shade50)
+                        color: index % 2 === 0 ? Material.backgroundColor : Material.color(Material.Grey, Material.Shade50)
                         radius: 4
                         
                         RowLayout {
@@ -194,7 +282,6 @@ Page {
                             anchors.fill: parent
                             cursorShape: Qt.PointingHandCursor
                             onClicked: {
-                                // Можно добавить просмотр деталей заказа
                                 console.log("Просмотр заказа:", modelData.id)
                             }
                         }
@@ -203,55 +290,12 @@ Page {
                     // Заглушка если нет заказов
                     Label {
                         anchors.centerIn: parent
-                        text: qsTr("Нет заказов")
+                        text: "Нет заказов"
                         visible: recentOrdersList.count === 0
                         font.italic: true
                         color: Material.color(Material.Grey)
                     }
                 }
-            }
-        }
-    }
-    
-    // Компонент для отображения статистики
-    component StatsCard: Rectangle {
-        property string title: ""
-        property var value: 0
-        property string icon: ""
-        property color color: Material.primary
-        
-        height: 120
-        radius: 8
-        color: Material.backgroundColor
-        border.color: Material.dividerColor
-        border.width: 1
-        
-        ColumnLayout {
-            anchors.fill: parent
-            anchors.margins: 15
-            
-            // Иконка
-            Text {
-                text: parent.parent.icon
-                font.pixelSize: 30
-                Layout.alignment: Qt.AlignHCenter
-            }
-            
-            // Значение
-            Text {
-                text: parent.parent.value
-                font.pixelSize: 28
-                font.bold: true
-                color: parent.parent.color
-                Layout.alignment: Qt.AlignHCenter
-            }
-            
-            // Заголовок
-            Text {
-                text: parent.parent.title
-                font.pixelSize: 12
-                color: Material.color(Material.Grey)
-                Layout.alignment: Qt.AlignHCenter
             }
         }
     }

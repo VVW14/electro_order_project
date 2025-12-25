@@ -39,31 +39,18 @@ Button {
             radius: parent.radius
             Behavior on color { ColorAnimation { duration: 200 } }
         }
-        
-        // Тень
-        layer.enabled: control.enabled
-        layer.effect: DropShadow {
-            transparentBorder: true
-            horizontalOffset: 0
-            verticalOffset: control.down ? 1 : 2
-            radius: control.down ? 4 : 8
-            samples: 17
-            color: "#40000000"
-        }
     }
     
     contentItem: Row {
         spacing: control.spacing
         layoutDirection: control.mirrored ? Qt.RightToLeft : Qt.LeftToRight
         
-        // Иконка
-        Image {
+        // Иконка как текст (для эмодзи)
+        Text {
             id: icon
-            source: control.iconSource
+            text: control.iconSource
             visible: control.iconSource !== ""
-            width: 20
-            height: 20
-            fillMode: Image.PreserveAspectFit
+            font.pixelSize: 16
             anchors.verticalCenter: parent.verticalCenter
         }
         
