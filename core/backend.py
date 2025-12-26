@@ -3,6 +3,8 @@
 """
 import json
 import os
+from .api_client import ApiClient
+
 from datetime import datetime
 from typing import List, Dict, Any
 
@@ -156,3 +158,14 @@ class Backend(QObject):
                query_lower in p.get('category', '').lower() or
                query_lower in str(p.get('specifications', '')).lower()
         ]
+    
+
+    @Slot(result=dict)
+    def getCurrencyRates(self):
+        """
+        HTTP-запрос курсов валют
+        """
+        rates = ApiClient.get_currency_rates()
+        if rates is None:
+            return {}
+        return rates
